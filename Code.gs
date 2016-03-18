@@ -300,8 +300,8 @@ function addressToPosition() {
   // Must have selected 3 columns (Address, Lat, Lng).
   // Must have selected at least 1 row.
 
-  if (cells.getNumColumns() != 3) {
-    Logger.log("Must select at least 3 columns: Address, Lat, Lng columns.");
+  if (cells.getNumColumns() !=4) {
+    Logger.log("Must select 4 columns: Address, Lat, Lng columns.");
     return;
   }
   
@@ -310,12 +310,16 @@ function addressToPosition() {
   
   var latColumn = addressColumn + 1;
   var lngColumn = addressColumn + 2;
+  var formattedAddressColumn = addressColumn + 3;
   
   var geocoder = Maps.newGeocoder().setRegion(getGeocodingRegion());
   var location;
   
   for (addressRow = 1; addressRow <= cells.getNumRows(); ++addressRow) {
     var address = cells.getCell(addressRow, addressColumn).getValue();
+    if(address===""){
+      continue;
+    }
     
     // Geocode the address and plug the lat, lng pair into the 
     // 2nd and 3rd elements of the current range row.
@@ -326,9 +330,11 @@ function addressToPosition() {
     if (location.status == 'OK') {
       lat = location["results"][0]["geometry"]["location"]["lat"];
       lng = location["results"][0]["geometry"]["location"]["lng"];
-      
+      formattedAddress = location["results"][0]["formatted_address"];
+
       cells.getCell(addressRow, latColumn).setValue(lat);
       cells.getCell(addressRow, lngColumn).setValue(lng);
+      cells.getCell(addressRow, formattedAddressColumn).setValue(formattedAddress);
     }
   }
 };
@@ -350,14 +356,14 @@ function positionToAddress() {
   
   var latColumn = addressColumn + 1;
   var lngColumn = addressColumn + 2;
-  
+    
   var geocoder = Maps.newGeocoder().setRegion(getGeocodingRegion());
   var location;
   
   for (addressRow = 1; addressRow <= cells.getNumRows(); ++addressRow) {
     var lat = cells.getCell(addressRow, latColumn).getValue();
     var lng = cells.getCell(addressRow, lngColumn).getValue();
-    
+        
     // Geocode the lat, lng pair to an address.
     location = geocoder.reverseGeocode(lat, lng);
    
@@ -411,4 +417,3 @@ function onOpen() {
   // SpreadsheetApp.getUi()
   //   .createMenu();
 };
-
